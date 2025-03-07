@@ -2,6 +2,7 @@ const sheet_id = "1aNOkajYXckSduHTAWXdt3lV-8UnP1tey6c7fqtpvo1A";
 const sheet_title = "Form responses 1";
 const sheet_range = "A1:K200";
 const url = `https://docs.google.com/spreadsheets/d/${sheet_id}/gviz/tq?sheet=${sheet_title}&range=${sheet_range}`;
+
 console.log(url);
 
 // Define a function to fetch data and return a Promise
@@ -13,6 +14,9 @@ async function fetchData() {
     }
     const rep = await res.text();
     const data = JSON.parse(rep.substr(47).slice(0, -2));
+
+    console.log(data);
+
     const tableData = [];
 
     data.table.rows.forEach((row, index) => {
@@ -20,21 +24,29 @@ async function fetchData() {
       rowData["SNO"] = index + 1;
 
       if (row.c) {
-        // Check if row.c is not null
-        row.c.forEach((cell, index) => {
-          if (cell) {
-            // Check if cell is not null
-            let value = cell.v;
-            if (typeof value === "string" && value.startsWith("Date")) {
-              value = cell.f;
-            }
-            const header = data.table.cols[index].label;
+        // Check if row.c exists
+        row.c.forEach((cell, colIndex) => {
+          let value = "-"; // Default value is null for missing data
 
-            rowData[header] = value;
-          } else {
+          if (cell) {
+            // If the cell exists
+            value = cell.v;
+
+            // Handle string values that start with "Date" and store formatted date
+            if (typeof value === "string" && value.startsWith("Date")) {
+              value = cell.f; // Use the formatted value if it's a date
+            }
           }
+
+          // Get the corresponding header for the column index
+          const header =
+            data.table.cols[colIndex]?.label || `Column ${colIndex + 1}`;
+
+          // Assign value to the rowData with the corresponding header
+          rowData[header] = value;
         });
       }
+
       tableData.push(rowData);
       console.log(rowData);
     });
@@ -44,29 +56,26 @@ async function fetchData() {
     console.error("There was a problem with the fetch operation:", error);
   }
 }
+
 //--------------------------------------------------------
 function orderedData(array, opt, need) {
   const filterByOpt = [];
+
+  // Check if the 'opt' is "all", and return the entire array if so
   if (opt === "all") {
-    array.forEach((row) => {
-      // console.log("success", row[need]);
-      filterByOpt.push(row);
-    });
+    return array;
   } else {
     array.forEach((row) => {
       if (row[need] === opt) {
-        // console.log("success", row[need]);
         filterByOpt.push(row);
       }
     });
+    return filterByOpt;
   }
-  return filterByOpt;
 }
 
 // Call fetchData and then use the returned data
-
 // You cannot access tableData here directly as it's an asynchronous operation
-// console.log(tableData.length); // This will not work here
 
 // If you need to use tableData in another function, you should call that function within the .then() block
 
