@@ -20,6 +20,8 @@ function onchangeToHideErrMess(id) {
 onchangeToHideErrMess("DriverName");
 // Function to add filtered data to HTML
 function AddFilterinHtml(filteredData) {
+  document.getElementById("table-id").style.display = "block";
+
   thead.innerHTML = "";
   tbody.innerHTML = "";
   filteredData.forEach((row, index) => {
@@ -164,6 +166,7 @@ RegForm_btn.addEventListener("click", () => {
 });
 
 Regbtn.addEventListener("click", () => {
+  document.getElementById("table-id").style.display = "none";
   container.style.display = "none";
   overlay.style.display = "block";
   menu.click();
